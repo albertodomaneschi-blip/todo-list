@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#4f46e5">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="To-do">
 <title>To-do list</title>
 <style>
   :root {
@@ -161,6 +165,21 @@
   $('clear').onclick = () => { todos = todos.filter(t => !t.done); save(); render(); };
 
   render();
+
+  // Aggiornamento automatico: il service worker scarica sempre l'ultima versione
+  // e la pagina si ricarica da sola quando ne trova una nuova.
+  if ('serviceWorker' in navigator) {
+    let hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hadController) location.reload();
+      hadController = true;
+    });
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) reg.update();
+      });
+    }).catch(() => {});
+  }
 </script>
 </body>
 </html>
