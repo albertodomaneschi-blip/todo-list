@@ -673,15 +673,18 @@
   render();
   checkReminders();
 
-  // Orario iniziale (Economia e analisi dei dati): caricato una sola volta per browser
-  const SEED_ORARIO = 'orario-seed-1';
+  // Orario iniziale: ogni nuova versione aggiunge solo le lezioni mancanti (per id),
+  // senza toccare quelle già presenti o modificate.
+  const SEED_ORARIO = 'orario-seed-1', SEED_VERSION = 2;
   try {
-    if (!localStorage.getItem(SEED_ORARIO)) {
+    if ((+localStorage.getItem(SEED_ORARIO) || 0) < SEED_VERSION) {
       fetch('orario-iniziale.json', { cache: 'no-cache' }).then(r => r.json()).then(lessons => {
-        mergeBundle({ app: 'todo-list', sched: { lessons } });
-        localStorage.setItem(SEED_ORARIO, '1');
+        const have = new Set(sched.lessons.map(l => l.id));
+        const fresh = lessons.filter(l => !have.has(l.id));
+        if (fresh.length) mergeBundle({ app: 'todo-list', sched: { lessons: fresh } });
+        localStorage.setItem(SEED_ORARIO, String(SEED_VERSION));
         render();
-        toast(`Orario caricato: ${lessons.length} lezioni.`);
+        if (fresh.length) toast(fresh.length === 1 ? 'Aggiunta 1 lezione all’orario.' : `Aggiunte ${fresh.length} lezioni all’orario.`);
       }).catch(() => {});
     }
   } catch (e) {}

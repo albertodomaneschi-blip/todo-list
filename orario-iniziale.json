@@ -1183,5 +1183,37 @@
   "to": "",
   "ex": [],
   "note": ""
+ },
+ {
+  "id": "ub-allenamento-lun",
+  "subject": "Allenamento Aurora Calcio",
+  "teacher": "",
+  "room": "",
+  "type": "altro",
+  "start": "19:00",
+  "end": "21:00",
+  "repeat": true,
+  "weekday": 0,
+  "date": "",
+  "from": "2026-10-19",
+  "to": "2026-12-20",
+  "ex": [],
+  "note": ""
+ },
+ {
+  "id": "ub-allenamento-mer",
+  "subject": "Allenamento Aurora Calcio",
+  "teacher": "",
+  "room": "",
+  "type": "altro",
+  "start": "19:00",
+  "end": "21:00",
+  "repeat": true,
+  "weekday": 2,
+  "date": "",
+  "from": "2026-10-19",
+  "to": "2026-12-20",
+  "ex": [],
+  "note": ""
  }
 ]

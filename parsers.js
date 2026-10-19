@@ -3,7 +3,7 @@
 (function (root) {
   'use strict';
 
-  const TYPES = ['lezione', 'esercitazione', 'laboratorio', 'esame', 'ricevimento'];
+  const TYPES = ['lezione', 'esercitazione', 'laboratorio', 'esame', 'ricevimento', 'altro'];
   const DAY_NAMES = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
   const DAY_KEYS = { lun: 0, mon: 0, mar: 1, tue: 1, mer: 2, wed: 2, gio: 3, thu: 3, ven: 4, fri: 4, sab: 5, sat: 5, dom: 6, sun: 6 };
 
