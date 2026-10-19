@@ -138,7 +138,7 @@
       h('span', { class: 'grow' },
         h('div', { class: 't' }, l.subject),
         h('div', { class: 'time' }, `${l.start}–${l.end}` + (l.room ? ' · ' + l.room : '')),
-        h('div', null, h('span', { class: 'tag' }, cap(l.type)), l.teacher ? h('span', { class: 'muted' }, l.teacher) : null)));
+        h('div', null, h('span', { class: 'tag' }, cap(l.type)), l.note ? h('span', { class: 'tag warn' }, l.note) : null, l.teacher ? h('span', { class: 'muted' }, l.teacher) : null)));
   }
 
   function filterChips() {
@@ -313,7 +313,7 @@
   const cleanLesson = (v, id) => ({
     id: id || uid(), subject: v.subject, teacher: v.teacher || '', room: v.room || '', type: TYPES.includes(v.type) ? v.type : 'lezione',
     start: v.start, end: v.end, repeat: !!v.repeat, weekday: v.repeat ? +v.weekday : undefined, date: v.repeat ? '' : v.date,
-    from: v.from || '', to: v.to || '', ex: v.ex || []
+    from: v.from || '', to: v.to || '', ex: v.ex || [], note: v.note || ''
   });
 
   function lessonForm(l) {
@@ -495,7 +495,7 @@
       const col = h('div', { class: 'col', style: `height:${H}px;background-image:repeating-linear-gradient(to bottom,var(--border) 0,var(--border) 1px,transparent 1px,transparent ${RH}px)` });
       lessonsOn(d).forEach(l => {
         const top = (minutes(l.start) - h0 * 60) / 60 * RH, ht = Math.max(18, (minutes(l.end) - minutes(l.start)) / 60 * RH - 1);
-        col.append(h('button', { class: 'blk', style: `top:${top}px;height:${ht}px;background:${colorOf(l.subject)}`, 'aria-label': `${l.subject} ${l.start}`, onclick: () => openLesson(l, d) }, l.subject));
+        col.append(h('button', { class: 'blk' + (l.note ? ' mod' : ''), style: `top:${top}px;height:${ht}px;background:${colorOf(l.subject)}`, 'aria-label': `${l.subject} ${l.start}`, onclick: () => openLesson(l, d) }, l.subject));
       });
       grid.append(col);
     });
@@ -672,6 +672,19 @@
   });
   render();
   checkReminders();
+
+  // Orario iniziale (Economia e analisi dei dati): caricato una sola volta per browser
+  const SEED_ORARIO = 'orario-seed-1';
+  try {
+    if (!localStorage.getItem(SEED_ORARIO)) {
+      fetch('orario-iniziale.json', { cache: 'no-cache' }).then(r => r.json()).then(lessons => {
+        mergeBundle({ app: 'todo-list', sched: { lessons } });
+        localStorage.setItem(SEED_ORARIO, '1');
+        render();
+        toast(`Orario caricato: ${lessons.length} lezioni.`);
+      }).catch(() => {});
+    }
+  } catch (e) {}
 
   // Aggiornamento automatico: il service worker scarica sempre l'ultima versione.
   if ('serviceWorker' in navigator) {

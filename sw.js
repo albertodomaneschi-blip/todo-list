@@ -3,7 +3,7 @@
 // librerie vengono messi in cache all'installazione per l'uso offline.
 const CACHE = 'todo-cache-v3';
 const SHELL = [
-  './', 'index.html', 'style.css', 'app.js', 'parsers.js', 'manifest.webmanifest',
+  './', 'index.html', 'style.css', 'app.js', 'parsers.js', 'orario-iniziale.json', 'manifest.webmanifest',
   'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
   'vendor/xlsx.mini.min.js', 'vendor/pdf.min.js', 'vendor/pdf.worker.min.js'
 ];
