@@ -63,6 +63,22 @@
   footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; color: var(--muted); font-size: .9rem; }
   .clear { background: none; color: var(--muted); text-decoration: underline; padding: 8px 0; }
   .clear:hover { color: var(--danger); }
+  .sync { background: none; color: var(--accent); font-weight: 600; padding: 8px 0; }
+  dialog {
+    width: min(92vw, 480px); border: 1px solid var(--border); border-radius: 16px; padding: 20px;
+    background: var(--card); color: var(--text);
+  }
+  dialog::backdrop { background: rgba(0,0,0,.45); }
+  dialog h2 { margin: 0 0 6px; font-size: 1.2rem; }
+  dialog p { margin: 0 0 12px; color: var(--muted); font-size: .9rem; }
+  textarea {
+    width: 100%; height: 140px; padding: 10px; font: .8rem/1.3 ui-monospace, Menlo, Consolas, monospace;
+    color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 10px; resize: vertical;
+  }
+  .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .row button { flex: 1; padding: 12px; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 600; }
+  .row button.sec { background: var(--accent-soft); color: var(--accent); }
+  #msg { min-height: 1.2em; margin-top: 10px; font-size: .9rem; color: var(--accent); }
 </style>
 </head>
 <body>
@@ -87,8 +103,21 @@
   <footer>
     <span id="count"></span>
     <button class="clear" id="clear" hidden>Elimina completate</button>
+    <button class="sync" id="syncBtn">Sincronizza</button>
   </footer>
 </div>
+
+<dialog id="dlg">
+  <h2>Sincronizza dispositivi</h2>
+  <p>Su un dispositivo tocca <b>Copia lista</b>, poi sull'altro incolla il testo qui sotto e tocca <b>Importa</b>. Le attività si uniscono a quelle già presenti.</p>
+  <textarea id="box" aria-label="Dati della lista" placeholder="Il testo copiato compare qui. Per importare, incollalo qui."></textarea>
+  <div class="row">
+    <button id="copyBtn">Copia lista</button>
+    <button id="importBtn">Importa</button>
+    <button class="sec" id="closeBtn">Chiudi</button>
+  </div>
+  <div id="msg" role="status"></div>
+</dialog>
 
 <script>
   const KEY = 'todo-list-v1';
@@ -163,6 +192,44 @@
     if (e.target.dataset.f) { filter = e.target.dataset.f; render(); }
   };
   $('clear').onclick = () => { todos = todos.filter(t => !t.done); save(); render(); };
+
+  // Sincronizzazione manuale: esporta/importa la lista come testo
+  const dlg = $('dlg'), box = $('box'), msg = $('msg');
+  const say = t => { msg.textContent = t; };
+  $('syncBtn').onclick = () => { box.value = ''; say(''); dlg.showModal(); };
+  $('closeBtn').onclick = () => dlg.close();
+  $('copyBtn').onclick = async () => {
+    box.value = JSON.stringify({ app: 'todo-list', todos });
+    try {
+      await navigator.clipboard.writeText(box.value);
+      say('Lista copiata. Incollala sull’altro dispositivo.');
+    } catch (e) {
+      box.select();
+      say('Seleziona il testo e copialo a mano.');
+    }
+  };
+  $('importBtn').onclick = async () => {
+    let text = box.value.trim();
+    if (!text) {
+      try { text = (await navigator.clipboard.readText()).trim(); box.value = text; } catch (e) {}
+    }
+    if (!text) { say('Incolla prima il testo copiato.'); return; }
+    let data;
+    try {
+      data = JSON.parse(text);
+      if (data.app !== 'todo-list' || !Array.isArray(data.todos)) throw 0;
+    } catch (e) { say('Testo non valido: copia la lista dall’altro dispositivo.'); return; }
+    const byId = new Map(todos.map(t => [t.id, t]));
+    let added = 0;
+    for (const t of data.todos) {
+      if (!t || typeof t.text !== 'string' || t.id == null) continue;
+      if (!byId.has(t.id)) added++;
+      byId.set(t.id, { id: t.id, text: t.text.slice(0, 200), done: !!t.done });
+    }
+    todos = [...byId.values()].sort((a, b) => b.id - a.id);
+    save(); render();
+    say(added === 1 ? 'Importata 1 nuova attività.' : 'Importate ' + added + ' nuove attività.');
+  };
 
   render();
 
