@@ -2,251 +2,29 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4f46e5">
+<title>To-do e orario</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="To-do">
-<title>To-do list</title>
-<style>
-  :root {
-    --bg: #f4f5f9; --card: #fff; --text: #1f2330; --muted: #7b8194;
-    --accent: #4f46e5; --accent-soft: #eceafd; --danger: #e5484d; --border: #e4e6ee;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #14161d; --card: #1e2129; --text: #eceef5; --muted: #8b91a5;
-      --accent: #818cf8; --accent-soft: #2a2d45; --danger: #f2686d; --border: #2c303c;
-    }
-  }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body {
-    margin: 0; background: var(--bg); color: var(--text);
-    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  }
-  .app { max-width: 560px; margin: 0 auto; padding: 24px 16px 40px; }
-  h1 { font-size: 1.6rem; margin: 0 0 4px; }
-  .sub { color: var(--muted); margin: 0 0 20px; font-size: .9rem; }
-  form { display: flex; gap: 8px; margin-bottom: 16px; }
-  input[type=text] {
-    flex: 1; min-width: 0; padding: 14px; font-size: 1rem; color: var(--text);
-    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  }
-  input[type=text]:focus { outline: 2px solid var(--accent); border-color: transparent; }
-  button { font: inherit; cursor: pointer; border: 0; }
-  .add {
-    padding: 0 20px; background: var(--accent); color: #fff; border-radius: 12px; font-weight: 600;
-  }
-  .filters { display: flex; gap: 6px; margin-bottom: 12px; }
-  .filters button {
-    flex: 1; padding: 10px 4px; border-radius: 10px; background: transparent;
-    color: var(--muted); font-size: .9rem; font-weight: 500;
-  }
-  .filters button.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
-  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-  li {
-    display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 14px;
-    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  }
-  li input[type=checkbox] {
-    width: 24px; height: 24px; flex: none; accent-color: var(--accent); cursor: pointer;
-  }
-  li span { flex: 1; word-break: break-word; }
-  li.done span { text-decoration: line-through; color: var(--muted); }
-  .del {
-    width: 40px; height: 40px; flex: none; border-radius: 10px; background: transparent;
-    color: var(--muted); font-size: 1.3rem; line-height: 1;
-  }
-  .del:hover, .del:focus-visible { color: var(--danger); background: var(--accent-soft); }
-  .empty { text-align: center; color: var(--muted); padding: 32px 0; }
-  footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; color: var(--muted); font-size: .9rem; }
-  .clear { background: none; color: var(--muted); text-decoration: underline; padding: 8px 0; }
-  .clear:hover { color: var(--danger); }
-  .sync { background: none; color: var(--accent); font-weight: 600; padding: 8px 0; }
-  dialog {
-    width: min(92vw, 480px); border: 1px solid var(--border); border-radius: 16px; padding: 20px;
-    background: var(--card); color: var(--text);
-  }
-  dialog::backdrop { background: rgba(0,0,0,.45); }
-  dialog h2 { margin: 0 0 6px; font-size: 1.2rem; }
-  dialog p { margin: 0 0 12px; color: var(--muted); font-size: .9rem; }
-  textarea {
-    width: 100%; height: 140px; padding: 10px; font: .8rem/1.3 ui-monospace, Menlo, Consolas, monospace;
-    color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 10px; resize: vertical;
-  }
-  .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-  .row button { flex: 1; padding: 12px; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 600; }
-  .row button.sec { background: var(--accent-soft); color: var(--accent); }
-  #msg { min-height: 1.2em; margin-top: 10px; font-size: .9rem; color: var(--accent); }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="app">
-  <h1>Le mie attività</h1>
-  <p class="sub" id="date"></p>
+<main id="main" class="app"></main>
 
-  <form id="form">
-    <input type="text" id="input" placeholder="Nuova attività…" maxlength="200" autocomplete="off" aria-label="Nuova attività">
-    <button class="add" type="submit">Aggiungi</button>
-  </form>
+<nav id="nav" aria-label="Sezioni">
+  <button data-tab="tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg><span>Attività</span></button>
+  <button data-tab="cal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>Calendario</span></button>
+  <button data-tab="orario"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg><span>Orario</span></button>
+  <button data-tab="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span>Impostazioni</span></button>
+</nav>
 
-  <div class="filters" id="filters">
-    <button data-f="all" class="active">Tutte</button>
-    <button data-f="active">Da fare</button>
-    <button data-f="done">Completate</button>
-  </div>
+<dialog id="sheet" aria-labelledby="sheetTitle"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
 
-  <ul id="list"></ul>
-  <div class="empty" id="empty" hidden></div>
-
-  <footer>
-    <span id="count"></span>
-    <button class="clear" id="clear" hidden>Elimina completate</button>
-    <button class="sync" id="syncBtn">Sincronizza</button>
-  </footer>
-</div>
-
-<dialog id="dlg">
-  <h2>Sincronizza dispositivi</h2>
-  <p>Su un dispositivo tocca <b>Copia lista</b>, poi sull'altro incolla il testo qui sotto e tocca <b>Importa</b>. Le attività si uniscono a quelle già presenti.</p>
-  <textarea id="box" aria-label="Dati della lista" placeholder="Il testo copiato compare qui. Per importare, incollalo qui."></textarea>
-  <div class="row">
-    <button id="copyBtn">Copia lista</button>
-    <button id="importBtn">Importa</button>
-    <button class="sec" id="closeBtn">Chiudi</button>
-  </div>
-  <div id="msg" role="status"></div>
-</dialog>
-
-<script>
-  const KEY = 'todo-list-v1';
-  let todos = [], filter = 'all';
-
-  try { todos = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { todos = []; }
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(todos)); } catch (e) {} };
-
-  // Impegni iniziali: aggiunti una sola volta per browser (flag SEED_KEY)
-  const SEED_KEY = 'todo-seed-1';
-  const SEED = [
-    'inserire app diritto (elettorato passivo)',
-    'come funziona code',
-    'esercizi lezione 4 (fx, operazioni di fx, curve di livello)',
-    'stampare appunti',
-    'comprare spf tret azelaic, guardare video e chiedere ad AI',
-    'tessera studente',
-    'mate: stampa esercitazione 1-2',
-    'sistemare app stampati',
-    'informarsi per i libri',
-    'cfp zanardelli pcto'
-  ];
-  try {
-    if (!localStorage.getItem(SEED_KEY)) {
-      const seeded = SEED.map((text, i) => ({ id: Date.now() + i, text, done: false }));
-      todos = seeded.concat(todos);
-      localStorage.setItem(SEED_KEY, '1');
-      save();
-    }
-  } catch (e) {}
-
-  const $ = id => document.getElementById(id);
-  $('date').textContent = new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
-
-  function render() {
-    const shown = todos.filter(t => filter === 'all' || (filter === 'done') === t.done);
-    const list = $('list');
-    list.innerHTML = '';
-    for (const t of shown) {
-      const li = document.createElement('li');
-      if (t.done) li.className = 'done';
-      const cb = document.createElement('input');
-      cb.type = 'checkbox'; cb.checked = t.done;
-      cb.setAttribute('aria-label', 'Completa');
-      cb.onchange = () => { t.done = cb.checked; save(); render(); };
-      const sp = document.createElement('span');
-      sp.textContent = t.text;
-      const del = document.createElement('button');
-      del.className = 'del'; del.textContent = '×'; del.setAttribute('aria-label', 'Elimina');
-      del.onclick = () => { todos = todos.filter(x => x.id !== t.id); save(); render(); };
-      li.append(cb, sp, del);
-      list.append(li);
-    }
-    const empty = $('empty');
-    empty.hidden = shown.length > 0;
-    empty.textContent = todos.length === 0 ? 'Nessuna attività. Aggiungine una!' : 'Nessuna attività in questa vista.';
-    const left = todos.filter(t => !t.done).length;
-    $('count').textContent = left === 1 ? '1 da fare' : left + ' da fare';
-    $('clear').hidden = !todos.some(t => t.done);
-    document.querySelectorAll('#filters button').forEach(b => b.classList.toggle('active', b.dataset.f === filter));
-  }
-
-  $('form').onsubmit = e => {
-    e.preventDefault();
-    const text = $('input').value.trim();
-    if (!text) return;
-    todos.unshift({ id: Date.now() + Math.random(), text, done: false });
-    $('input').value = '';
-    save(); render();
-  };
-  $('filters').onclick = e => {
-    if (e.target.dataset.f) { filter = e.target.dataset.f; render(); }
-  };
-  $('clear').onclick = () => { todos = todos.filter(t => !t.done); save(); render(); };
-
-  // Sincronizzazione manuale: esporta/importa la lista come testo
-  const dlg = $('dlg'), box = $('box'), msg = $('msg');
-  const say = t => { msg.textContent = t; };
-  $('syncBtn').onclick = () => { box.value = ''; say(''); dlg.showModal(); };
-  $('closeBtn').onclick = () => dlg.close();
-  $('copyBtn').onclick = async () => {
-    box.value = JSON.stringify({ app: 'todo-list', todos });
-    try {
-      await navigator.clipboard.writeText(box.value);
-      say('Lista copiata. Incollala sull’altro dispositivo.');
-    } catch (e) {
-      box.select();
-      say('Seleziona il testo e copialo a mano.');
-    }
-  };
-  $('importBtn').onclick = async () => {
-    let text = box.value.trim();
-    if (!text) {
-      try { text = (await navigator.clipboard.readText()).trim(); box.value = text; } catch (e) {}
-    }
-    if (!text) { say('Incolla prima il testo copiato.'); return; }
-    let data;
-    try {
-      data = JSON.parse(text);
-      if (data.app !== 'todo-list' || !Array.isArray(data.todos)) throw 0;
-    } catch (e) { say('Testo non valido: copia la lista dall’altro dispositivo.'); return; }
-    const byId = new Map(todos.map(t => [t.id, t]));
-    let added = 0;
-    for (const t of data.todos) {
-      if (!t || typeof t.text !== 'string' || t.id == null) continue;
-      if (!byId.has(t.id)) added++;
-      byId.set(t.id, { id: t.id, text: t.text.slice(0, 200), done: !!t.done });
-    }
-    todos = [...byId.values()].sort((a, b) => b.id - a.id);
-    save(); render();
-    say(added === 1 ? 'Importata 1 nuova attività.' : 'Importate ' + added + ' nuove attività.');
-  };
-
-  render();
-
-  // Aggiornamento automatico: il service worker scarica sempre l'ultima versione
-  // e la pagina si ricarica da sola quando ne trova una nuova.
-  if ('serviceWorker' in navigator) {
-    let hadController = !!navigator.serviceWorker.controller;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (hadController) location.reload();
-      hadController = true;
-    });
-    navigator.serviceWorker.register('sw.js').then(reg => {
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) reg.update();
-      });
-    }).catch(() => {});
-  }
-</script>
+<script src="parsers.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
