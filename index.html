@@ -93,6 +93,29 @@
   try { todos = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { todos = []; }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(todos)); } catch (e) {} };
 
+  // Impegni iniziali: aggiunti una sola volta per browser (flag SEED_KEY)
+  const SEED_KEY = 'todo-seed-1';
+  const SEED = [
+    'inserire app diritto (elettorato passivo)',
+    'come funziona code',
+    'esercizi lezione 4 (fx, operazioni di fx, curve di livello)',
+    'stampare appunti',
+    'comprare spf tret azelaic, guardare video e chiedere ad AI',
+    'tessera studente',
+    'mate: stampa esercitazione 1-2',
+    'sistemare app stampati',
+    'informarsi per i libri',
+    'cfp zanardelli pcto'
+  ];
+  try {
+    if (!localStorage.getItem(SEED_KEY)) {
+      const seeded = SEED.map((text, i) => ({ id: Date.now() + i, text, done: false }));
+      todos = seeded.concat(todos);
+      localStorage.setItem(SEED_KEY, '1');
+      save();
+    }
+  } catch (e) {}
+
   const $ = id => document.getElementById(id);
   $('date').textContent = new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
 
